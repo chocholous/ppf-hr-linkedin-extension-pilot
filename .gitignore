@@ -1,0 +1,7 @@
+node_modules/
+.playwright-profile/
+test-results/
+*.pem
+*.crx
+*.zip
+.DS_Store

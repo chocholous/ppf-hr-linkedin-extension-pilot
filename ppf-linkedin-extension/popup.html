@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+  <meta charset="UTF-8">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      width: 280px;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      font-size: 13px;
+      color: #e0e0e0;
+      background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+    }
+    .popup {
+      padding: 16px;
+    }
+    .logo {
+      font-weight: 700;
+      font-size: 15px;
+      color: #d4a843;
+      letter-spacing: 0.5px;
+      margin-bottom: 12px;
+    }
+    .status {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 10px;
+      border-radius: 6px;
+      margin-bottom: 12px;
+      font-size: 12px;
+      font-weight: 600;
+    }
+    .status-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+    .status-ok { background: rgba(76, 175, 80, 0.15); }
+    .status-ok .status-dot { background: #22c55e; }
+    .status-ok .status-text { color: #66bb6a; }
+    .status-err { background: rgba(244, 67, 54, 0.15); }
+    .status-err .status-dot { background: #ef4444; }
+    .status-err .status-text { color: #ef5350; }
+    .hint {
+      font-size: 12px;
+      color: #aaa;
+      line-height: 1.5;
+      margin-bottom: 8px;
+    }
+    .hint a {
+      color: #d4a843;
+      text-decoration: none;
+      font-weight: 600;
+    }
+    .hint a:hover { text-decoration: underline; }
+    .divider {
+      border: none;
+      border-top: 1px solid rgba(255,255,255,0.08);
+      margin: 10px 0;
+    }
+    .section-title {
+      font-size: 11px;
+      color: #888;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 6px;
+    }
+    .pages {
+      list-style: none;
+      font-size: 12px;
+      color: #ccc;
+      line-height: 1.8;
+    }
+    .pages li::before {
+      content: "✓ ";
+      color: #d4a843;
+    }
+    .version {
+      font-size: 11px;
+      color: #666;
+      text-align: center;
+    }
+  </style>
+</head>
+<body>
+  <div class="popup">
+    <div class="logo">PPF eRec – LinkedIn Matcher</div>
+
+    <div id="status" class="status">
+      <span class="status-dot"></span>
+      <span class="status-text">Zjišťuji…</span>
+    </div>
+
+    <div id="login-hint" class="hint" style="display:none;">
+      Přihlaste se do <a href="#" id="erec-link" target="_blank" rel="noopener">PPF eRec</a> v jiném tabu a obnovte stránku.
+    </div>
+
+    <hr class="divider">
+
+    <div class="section-title">Funguje na</div>
+    <ul class="pages">
+      <li>LinkedIn profily</li>
+      <li>LinkedIn vyhledávání</li>
+      <li>LinkedIn Recruiter</li>
+    </ul>
+
+    <hr class="divider">
+    <div id="version" class="version"></div>
+  </div>
+
+  <script src="popup.js"></script>
+</body>
+</html>

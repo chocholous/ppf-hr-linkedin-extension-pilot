@@ -1,0 +1,410 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+  <meta charset="UTF-8">
+  <title>PPF eRec – LinkedIn Matcher</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      color: #e0e0e0;
+    }
+    .card {
+      max-width: 520px;
+      padding: 40px;
+    }
+    .logo {
+      font-size: 28px;
+      font-weight: 700;
+      color: #d4a843;
+      margin-bottom: 8px;
+    }
+    .subtitle {
+      font-size: 14px;
+      color: #999;
+      margin-bottom: 32px;
+    }
+
+    /* Steps */
+    .step {
+      display: flex;
+      gap: 16px;
+      margin-bottom: 24px;
+      transition: opacity 0.3s;
+    }
+    .step.disabled {
+      opacity: 0.35;
+      pointer-events: none;
+    }
+    .step-num {
+      width: 32px;
+      height: 32px;
+      background: rgba(212, 168, 67, 0.15);
+      color: #d4a843;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      font-size: 14px;
+      flex-shrink: 0;
+      transition: background 0.3s, color 0.3s;
+    }
+    .step.done .step-num {
+      background: rgba(34, 197, 94, 0.2);
+      color: #22c55e;
+    }
+    .step-content h3 {
+      font-size: 15px;
+      font-weight: 600;
+      color: #fff;
+      margin-bottom: 4px;
+    }
+    .step-content p {
+      font-size: 13px;
+      color: #aaa;
+      line-height: 1.5;
+    }
+    .step-content a {
+      color: #d4a843;
+      text-decoration: none;
+      font-weight: 600;
+    }
+    .step-content a:hover { text-decoration: underline; }
+
+    /* Form */
+    .setup-form {
+      margin-top: 8px;
+      padding: 12px;
+      background: rgba(255,255,255,0.04);
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 8px;
+    }
+    .setup-form label {
+      display: block;
+      font-size: 12px;
+      color: #999;
+      margin-bottom: 6px;
+    }
+    .setup-row {
+      display: flex;
+      gap: 8px;
+    }
+    .setup-form input {
+      flex: 1;
+      padding: 8px 12px;
+      border: 1px solid rgba(255,255,255,0.15);
+      border-radius: 6px;
+      background: rgba(255,255,255,0.08);
+      color: #e0e0e0;
+      font-size: 14px;
+      font-family: inherit;
+      outline: none;
+    }
+    .setup-form input:focus { border-color: #d4a843; }
+    .setup-form input::placeholder { color: #555; }
+    .btn {
+      padding: 8px 20px;
+      border: none;
+      border-radius: 6px;
+      background: #d4a843;
+      color: #1a1a2e;
+      font-weight: 700;
+      font-size: 13px;
+      cursor: pointer;
+      white-space: nowrap;
+    }
+    .btn:hover { background: #e0b94e; }
+    .btn:disabled { background: #555; color: #999; cursor: not-allowed; }
+    .msg {
+      margin-top: 8px;
+      font-size: 12px;
+      line-height: 1.4;
+    }
+    .msg.ok { color: #22c55e; }
+    .msg.err { color: #ef4444; }
+    .msg.info { color: #999; }
+
+    /* Login step */
+    .login-row {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+      margin-top: 8px;
+    }
+
+    /* Pin instructions */
+    .pin-img {
+      margin-top: 4px;
+      padding: 8px 12px;
+      background: rgba(255,255,255,0.06);
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 6px;
+      font-size: 13px;
+      color: #ccc;
+      line-height: 1.6;
+    }
+    .icon-inline {
+      display: inline-block;
+      vertical-align: middle;
+      position: relative;
+      top: -1px;
+    }
+
+    /* Success pages */
+    .pages {
+      list-style: none;
+      margin-top: 6px;
+    }
+    .pages li {
+      font-size: 13px;
+      color: #ccc;
+      line-height: 1.8;
+    }
+    .pages li::before {
+      content: "✓ ";
+      color: #d4a843;
+    }
+    .footer {
+      margin-top: 32px;
+      text-align: center;
+      font-size: 12px;
+      color: #666;
+    }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <div class="logo">PPF eRec – LinkedIn Matcher</div>
+    <div class="subtitle">Extension byla úspěšně nainstalována</div>
+
+    <!-- Step 1: Domain -->
+    <div class="step" id="step-domain">
+      <div class="step-num" id="num-domain">1</div>
+      <div class="step-content">
+        <h3>Nastavte připojení k eRec</h3>
+        <p>Zadejte doménu vaší eRec instance (dostanete ji od administrátora):</p>
+        <div class="setup-form">
+          <label for="domain-input">Doména</label>
+          <div class="setup-row">
+            <input type="text" id="domain-input" placeholder="firma.example.com">
+            <button class="btn" id="save-btn">Uložit</button>
+          </div>
+          <div id="domain-msg" class="msg"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Step 2: Login -->
+    <div class="step disabled" id="step-login">
+      <div class="step-num" id="num-login">2</div>
+      <div class="step-content">
+        <h3>Přihlaste se do eRec</h3>
+        <p>Otevřete eRec v novém tabu, přihlaste se a vraťte se sem.</p>
+        <div class="login-row">
+          <a href="#" id="erec-link" target="_blank" rel="noopener" class="btn" style="text-decoration:none; display:inline-block;">Otevřít eRec</a>
+          <button class="btn" id="check-btn" style="background: rgba(255,255,255,0.1); color: #e0e0e0;">Ověřit přihlášení</button>
+        </div>
+        <div id="login-msg" class="msg"></div>
+      </div>
+    </div>
+
+    <!-- Step 3: Pin -->
+    <div class="step disabled" id="step-pin">
+      <div class="step-num" id="num-pin">3</div>
+      <div class="step-content">
+        <h3>Připněte si extension</h3>
+        <p>Klikněte na ikonu <svg class="icon-inline" width="18" height="18" viewBox="0 -960 960 960" fill="#5f6368"><path d="M352-120H200q-33 0-56.5-23.5T120-200v-152q48 0 84-30.5t36-77.5q0-47-36-77.5T120-568v-152q0-33 23.5-56.5T200-800h160q0-42 29-71t71-29q42 0 71 29t29 71h160q33 0 56.5 23.5T800-720v160q42 0 71 29t29 71q0 42-29 71t-71 29v160q0 33-23.5 56.5T720-120H568q0-50-31.5-85T460-240q-45 0-76.5 35T352-120Z"/></svg> v toolbaru Chrome a připněte PPF eRec.</p>
+        <div class="pin-img">
+          <svg class="icon-inline" width="16" height="16" viewBox="0 -960 960 960" fill="#5f6368"><path d="M352-120H200q-33 0-56.5-23.5T120-200v-152q48 0 84-30.5t36-77.5q0-47-36-77.5T120-568v-152q0-33 23.5-56.5T200-800h160q0-42 29-71t71-29q42 0 71 29t29 71h160q33 0 56.5 23.5T800-720v160q42 0 71 29t29 71q0 42-29 71t-71 29v160q0 33-23.5 56.5T720-120H568q0-50-31.5-85T460-240q-45 0-76.5 35T352-120Z"/></svg> → najděte <strong>PPF eRec – LinkedIn Matcher</strong> → klikněte na <svg class="icon-inline" width="16" height="16" viewBox="0 -960 960 960" fill="#5f6368"><path d="m640-480 80 80v80H520v240l-40 40-40-40v-240H240v-80l80-80v-280h-40v-80h400v80h-40v280Z"/></svg>
+        </div>
+      </div>
+    </div>
+
+    <!-- Step 4: Done -->
+    <div class="step disabled" id="step-done">
+      <div class="step-num" id="num-done">4</div>
+      <div class="step-content">
+        <h3>Otevřete LinkedIn</h3>
+        <p>Extension automaticky vyhledá kandidáta v eRec. Funguje na:</p>
+        <ul class="pages">
+          <li>LinkedIn profily</li>
+          <li>LinkedIn vyhledávání</li>
+          <li>LinkedIn Recruiter</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="footer">PPF Group — interní nástroj</div>
+  </div>
+
+<script>
+  const domainInput = document.getElementById("domain-input");
+  const saveBtn = document.getElementById("save-btn");
+  const domainMsg = document.getElementById("domain-msg");
+  const erecLink = document.getElementById("erec-link");
+  const checkBtn = document.getElementById("check-btn");
+  const loginMsg = document.getElementById("login-msg");
+
+  const steps = {
+    domain: document.getElementById("step-domain"),
+    login: document.getElementById("step-login"),
+    pin: document.getElementById("step-pin"),
+    done: document.getElementById("step-done"),
+  };
+  const nums = {
+    domain: document.getElementById("num-domain"),
+    login: document.getElementById("num-login"),
+    pin: document.getElementById("num-pin"),
+    done: document.getElementById("num-done"),
+  };
+
+  let savedDomain = null;
+
+  function markDone(stepName) {
+    steps[stepName].classList.add("done");
+    steps[stepName].classList.remove("disabled");
+    nums[stepName].textContent = "✓";
+  }
+  function enable(stepName) {
+    steps[stepName].classList.remove("disabled");
+  }
+
+  // --- Step 1: Save domain ---
+
+  saveBtn.addEventListener("click", async () => {
+    const domain = domainInput.value.trim().toLowerCase();
+    domainMsg.textContent = "";
+    domainMsg.className = "msg";
+
+    if (!domain || !domain.includes(".")) {
+      domainMsg.textContent = "Zadejte platnou doménu";
+      domainMsg.className = "msg err";
+      return;
+    }
+
+    saveBtn.disabled = true;
+    saveBtn.textContent = "Ukládám…";
+
+    try {
+      const granted = await chrome.permissions.request({
+        origins: [
+          `https://web.${domain}/*`,
+          `https://api.${domain}/*`,
+        ],
+      });
+
+      if (!granted) {
+        domainMsg.textContent = "Přístup nebyl povolen — extension potřebuje oprávnění pro čtení cookies a API.";
+        domainMsg.className = "msg err";
+        saveBtn.disabled = false;
+        saveBtn.textContent = "Uložit";
+        return;
+      }
+
+      await chrome.storage.local.set({ erecDomain: domain });
+      savedDomain = domain;
+
+      domainMsg.textContent = `✓ Uloženo — web.${domain}`;
+      domainMsg.className = "msg ok";
+      erecLink.href = `https://web.${domain}`;
+
+      markDone("domain");
+      enable("login");
+    } catch (e) {
+      domainMsg.textContent = `Chyba: ${e.message}`;
+      domainMsg.className = "msg err";
+    }
+
+    saveBtn.disabled = false;
+    saveBtn.textContent = "Uložit";
+  });
+
+  // --- Step 2: Check login ---
+
+  checkBtn.addEventListener("click", async () => {
+    if (!savedDomain) return;
+
+    loginMsg.textContent = "";
+    loginMsg.className = "msg";
+    checkBtn.disabled = true;
+    checkBtn.textContent = "Ověřuji…";
+
+    try {
+      const cookie = await chrome.cookies.get({
+        url: `https://web.${savedDomain}`,
+        name: "erec_token",
+      });
+
+      if (cookie && cookie.value) {
+        // Try an actual API call to verify the token works
+        const token = decodeURIComponent(cookie.value);
+        const apiUrl = `https://api.${savedDomain}/api/v1/grids/candidates?perPage=1&firstname=test&lastname=test`;
+
+        const res = await fetch(apiUrl, {
+          headers: {
+            Accept: "application/json",
+            Authorization: `Bearer ${token}`,
+            "X-Requested-With": "XMLHttpRequest",
+          },
+        });
+
+        if (res.ok) {
+          loginMsg.textContent = "✓ Přihlášení ověřeno — spojení s eRec funguje";
+          loginMsg.className = "msg ok";
+          markDone("login");
+          enable("pin");
+          enable("done");
+        } else if (res.status === 401 || res.status === 403) {
+          loginMsg.textContent = "Token vypršel nebo je neplatný. Přihlaste se znovu do eRec a zkuste to znovu.";
+          loginMsg.className = "msg err";
+        } else {
+          loginMsg.textContent = `API vrátilo chybu ${res.status}. Zkontrolujte, že doména je správná.`;
+          loginMsg.className = "msg err";
+        }
+      } else {
+        loginMsg.textContent = "Cookie nenalezena — přihlaste se do eRec v jiném tabu a zkuste znovu.";
+        loginMsg.className = "msg err";
+      }
+    } catch (e) {
+      loginMsg.textContent = `Chyba spojení: ${e.message} — zkontrolujte, že doména je správná.`;
+      loginMsg.className = "msg err";
+    }
+
+    checkBtn.disabled = false;
+    checkBtn.textContent = "Ověřit přihlášení";
+  });
+
+  // --- Restore state if already configured ---
+
+  chrome.storage.local.get("erecDomain", async ({ erecDomain }) => {
+    if (!erecDomain) return;
+
+    savedDomain = erecDomain;
+    domainInput.value = erecDomain;
+    erecLink.href = `https://web.${erecDomain}`;
+    domainMsg.textContent = `✓ Uloženo — web.${erecDomain}`;
+    domainMsg.className = "msg ok";
+    markDone("domain");
+    enable("login");
+
+    // Auto-check login status
+    try {
+      const cookie = await chrome.cookies.get({
+        url: `https://web.${erecDomain}`,
+        name: "erec_token",
+      });
+      if (cookie && cookie.value) {
+        loginMsg.textContent = "✓ Přihlášení detekováno — klikněte na Ověřit pro plný test";
+        loginMsg.className = "msg info";
+      }
+    } catch (e) { /* ignore */ }
+  });
+</script>
+</body>
+</html>
