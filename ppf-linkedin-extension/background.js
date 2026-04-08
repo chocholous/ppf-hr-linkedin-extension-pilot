@@ -153,6 +153,10 @@ chrome.storage.onChanged.addListener((changes, area) => {
 // --- Message handler ---
 
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
+  if (request.action === "updateBadge") {
+    updateBadge();
+    return false;
+  }
   if (request.action === "getConfig") {
     getConfig().then((config) => sendResponse(config));
     return true;

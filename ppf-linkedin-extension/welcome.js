@@ -20,6 +20,29 @@ const nums = {
 
 let savedDomain = null;
 
+function showSuccess() {
+  // Create success overlay
+  const overlay = document.createElement("div");
+  overlay.className = "success-overlay";
+  overlay.innerHTML =
+    '<div class="success-card">' +
+      '<div class="success-icon">&#10003;</div>' +
+      '<div class="success-title">V\u0161e je p\u0159ipraveno!</div>' +
+      '<div class="success-text">Extension je nakonfigurovan\u00e1 a p\u0159ipojen\u00e1 k eRec.<br>Otev\u0159ete LinkedIn a vyzkou\u0161ejte ji.</div>' +
+      '<a href="https://www.linkedin.com/search/results/people/" target="_blank" rel="noopener" class="success-btn">Otev\u0159\u00edt LinkedIn</a>' +
+    '</div>';
+  document.body.appendChild(overlay);
+  // Animate in
+  requestAnimationFrame(() => { overlay.classList.add("visible"); });
+  // Dismiss on click outside
+  overlay.addEventListener("click", (e) => {
+    if (e.target === overlay) {
+      overlay.classList.remove("visible");
+      setTimeout(() => overlay.remove(), 300);
+    }
+  });
+}
+
 function markDone(stepName) {
   steps[stepName].classList.add("done");
   steps[stepName].classList.remove("disabled");
@@ -65,10 +88,22 @@ saveBtn.addEventListener("click", async () => {
     erecLink.href = "https://web." + domain;
     domainMsg.textContent = "✓ Uloženo — web." + domain;
     domainMsg.className = "msg ok";
-    saveBtn.disabled = false;
-    saveBtn.textContent = "Uložit";
     markDone("domain");
     enable("login");
+
+    // Auto-check login right away
+    saveBtn.textContent = "Ověřuji přihlášení…";
+    var loggedIn = await tryVerifyLogin(domain);
+    if (loggedIn) {
+      markDone("login");
+      enable("pin");
+      enable("done");
+      chrome.runtime.sendMessage({ action: "updateBadge" });
+      showSuccess();
+    }
+
+    saveBtn.disabled = false;
+    saveBtn.textContent = "Uložit";
   } catch (e) {
     domainMsg.textContent = "Chyba: " + e.message;
     domainMsg.className = "msg err";
@@ -76,6 +111,31 @@ saveBtn.addEventListener("click", async () => {
     saveBtn.textContent = "Uložit";
   }
 });
+
+// --- Login verification (shared) ---
+
+async function tryVerifyLogin(domain) {
+  try {
+    var cookie = await chrome.cookies.get({
+      url: "https://web." + domain,
+      name: "erec_token",
+    });
+    if (!cookie || !cookie.value) return false;
+
+    var token = decodeURIComponent(cookie.value);
+    var apiUrl = "https://api." + domain + "/api/v1/grids/candidates?perPage=1&firstname=test&lastname=test";
+    var res = await fetch(apiUrl, {
+      headers: {
+        Accept: "application/json",
+        Authorization: "Bearer " + token,
+        "X-Requested-With": "XMLHttpRequest",
+      },
+    });
+    return res.ok;
+  } catch (e) {
+    return false;
+  }
+}
 
 // --- Step 2: Check login ---
 
@@ -87,43 +147,31 @@ checkBtn.addEventListener("click", async () => {
   checkBtn.disabled = true;
   checkBtn.textContent = "Ověřuji…";
 
-  try {
-    const cookie = await chrome.cookies.get({
-      url: "https://web." + savedDomain,
-      name: "erec_token",
-    });
+  var ok = await tryVerifyLogin(savedDomain);
 
-    if (cookie && cookie.value) {
-      const token = decodeURIComponent(cookie.value);
-      const apiUrl = "https://api." + savedDomain + "/api/v1/grids/candidates?perPage=1&firstname=test&lastname=test";
-
-      const res = await fetch(apiUrl, {
-        headers: {
-          Accept: "application/json",
-          Authorization: "Bearer " + token,
-          "X-Requested-With": "XMLHttpRequest",
-        },
+  if (ok) {
+    loginMsg.textContent = "✓ Přihlášení ověřeno — spojení s eRec funguje";
+    loginMsg.className = "msg ok";
+    markDone("login");
+    enable("pin");
+    enable("done");
+    chrome.runtime.sendMessage({ action: "updateBadge" });
+    showSuccess();
+  } else {
+    // Try to give a more specific error
+    try {
+      var cookie = await chrome.cookies.get({
+        url: "https://web." + savedDomain,
+        name: "erec_token",
       });
-
-      if (res.ok) {
-        loginMsg.textContent = "✓ Přihlášení ověřeno — spojení s eRec funguje";
-        loginMsg.className = "msg ok";
-        markDone("login");
-        enable("pin");
-        enable("done");
-      } else if (res.status === 401 || res.status === 403) {
-        loginMsg.textContent = "Token vypršel nebo je neplatný. Přihlaste se znovu do eRec a zkuste to znovu.";
-        loginMsg.className = "msg err";
+      if (!cookie || !cookie.value) {
+        loginMsg.textContent = "Cookie nenalezena — přihlaste se do eRec v jiném tabu a zkuste znovu.";
       } else {
-        loginMsg.textContent = "API vrátilo chybu " + res.status + ". Zkontrolujte, že doména je správná.";
-        loginMsg.className = "msg err";
+        loginMsg.textContent = "Přihlášení selhalo — zkontrolujte doménu nebo se přihlaste znovu.";
       }
-    } else {
-      loginMsg.textContent = "Cookie nenalezena — přihlaste se do eRec v jiném tabu a zkuste znovu.";
-      loginMsg.className = "msg err";
+    } catch (e) {
+      loginMsg.textContent = "Chyba spojení: " + e.message;
     }
-  } catch (e) {
-    loginMsg.textContent = "Chyba spojení: " + e.message + " — zkontrolujte, že doména je správná.";
     loginMsg.className = "msg err";
   }
 
