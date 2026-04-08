@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "PPF eRec – LinkedIn Matcher",
-  "version": "0.2.2",
+  "version": "0.2.3",
   "description": "Zobrazí odkaz na kandidáta v PPF eRec přímo na LinkedIn profilu.",
   "permissions": [
     "cookies",
