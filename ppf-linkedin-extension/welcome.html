@@ -292,27 +292,46 @@
     saveBtn.textContent = "Ukládám…";
 
     try {
-      const granted = await chrome.permissions.request({
-        origins: [
-          `https://web.${domain}/*`,
-          `https://api.${domain}/*`,
-        ],
-      });
-
-      if (!granted) {
-        domainMsg.textContent = "Přístup nebyl povolen — extension potřebuje oprávnění pro čtení cookies a API.";
-        domainMsg.className = "msg err";
-        saveBtn.disabled = false;
-        saveBtn.textContent = "Uložit";
-        return;
+      // Try requesting permissions with a timeout — force-installed extensions
+      // may already have permissions granted via policy, or request may hang
+      let granted = false;
+      try {
+        granted = await Promise.race([
+          chrome.permissions.request({
+            origins: [
+              `https://web.${domain}/*`,
+              `https://api.${domain}/*`,
+            ],
+          }),
+          new Promise((_, reject) => setTimeout(() => reject(new Error("timeout")), 3000)),
+        ]);
+      } catch (permErr) {
+        // Permissions may already be granted by policy — check instead
+        try {
+          granted = await chrome.permissions.contains({
+            origins: [
+              `https://web.${domain}/*`,
+              `https://api.${domain}/*`,
+            ],
+          });
+        } catch (e) {
+          // If even contains fails, proceed anyway — policy may handle it
+          granted = true;
+        }
       }
 
+      // Save domain regardless — permissions may be handled by policy
       await chrome.storage.local.set({ erecDomain: domain });
       savedDomain = domain;
-
-      domainMsg.textContent = `✓ Uloženo — web.${domain}`;
-      domainMsg.className = "msg ok";
       erecLink.href = `https://web.${domain}`;
+
+      if (granted) {
+        domainMsg.textContent = `✓ Uloženo — web.${domain}`;
+        domainMsg.className = "msg ok";
+      } else {
+        domainMsg.textContent = `Uloženo — web.${domain} (oprávnění bude potřeba povolit v nastavení extension)`;
+        domainMsg.className = "msg info";
+      }
 
       markDone("domain");
       enable("login");
