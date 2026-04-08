@@ -121,6 +121,33 @@
     }
     .btn:hover { background: #e0b94e; }
     .btn:disabled { background: #555; color: #999; cursor: not-allowed; }
+    .btn-outline {
+      padding: 8px 20px;
+      border: 1px solid #d4a843;
+      border-radius: 6px;
+      background: transparent;
+      color: #d4a843;
+      font-weight: 700;
+      font-size: 13px;
+      cursor: pointer;
+      white-space: nowrap;
+      text-decoration: none;
+      display: inline-block;
+    }
+    .btn-outline:hover { background: rgba(212, 168, 67, 0.12); color: #e0b94e; }
+    .btn-secondary {
+      padding: 8px 20px;
+      border: 1px solid rgba(255,255,255,0.15);
+      border-radius: 6px;
+      background: rgba(255,255,255,0.06);
+      color: #e0e0e0;
+      font-weight: 600;
+      font-size: 13px;
+      cursor: pointer;
+      white-space: nowrap;
+    }
+    .btn-secondary:hover { background: rgba(255,255,255,0.12); border-color: rgba(255,255,255,0.25); }
+    .btn-secondary:disabled { background: #333; color: #666; cursor: not-allowed; border-color: #444; }
     .msg {
       margin-top: 8px;
       font-size: 12px;
@@ -207,8 +234,8 @@
         <h3>Přihlaste se do eRec</h3>
         <p>Otevřete eRec v novém tabu, přihlaste se a vraťte se sem.</p>
         <div class="login-row">
-          <a href="#" id="erec-link" target="_blank" rel="noopener" class="btn" style="text-decoration:none; display:inline-block;">Otevřít eRec</a>
-          <button class="btn" id="check-btn" style="background: rgba(255,255,255,0.1); color: #e0e0e0;">Ověřit přihlášení</button>
+          <a href="#" id="erec-link" target="_blank" rel="noopener" class="btn-outline">Otevřít eRec</a>
+          <button class="btn-secondary" id="check-btn">Ověřit přihlášení</button>
         </div>
         <div id="login-msg" class="msg"></div>
       </div>

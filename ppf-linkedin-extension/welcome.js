@@ -31,7 +31,7 @@ function enable(stepName) {
 
 // --- Step 1: Save domain ---
 
-saveBtn.addEventListener("click", () => {
+saveBtn.addEventListener("click", async () => {
   const domain = domainInput.value.trim().toLowerCase();
   domainMsg.textContent = "";
   domainMsg.className = "msg";
@@ -45,15 +45,22 @@ saveBtn.addEventListener("click", () => {
   saveBtn.disabled = true;
   saveBtn.textContent = "Ukládám…";
 
-  chrome.storage.local.set({ erecDomain: domain }, () => {
-    if (chrome.runtime.lastError) {
-      domainMsg.textContent = "Chyba: " + chrome.runtime.lastError.message;
+  try {
+    // Request host permissions for the eRec domain
+    const granted = await chrome.permissions.request({
+      origins: ["https://web." + domain + "/*", "https://api." + domain + "/*"],
+    });
+
+    if (!granted) {
+      domainMsg.textContent = "Přístup k doméně nebyl povolen.";
       domainMsg.className = "msg err";
       saveBtn.disabled = false;
       saveBtn.textContent = "Uložit";
       return;
     }
 
+    // Save domain
+    await chrome.storage.local.set({ erecDomain: domain });
     savedDomain = domain;
     erecLink.href = "https://web." + domain;
     domainMsg.textContent = "✓ Uloženo — web." + domain;
@@ -62,7 +69,12 @@ saveBtn.addEventListener("click", () => {
     saveBtn.textContent = "Uložit";
     markDone("domain");
     enable("login");
-  });
+  } catch (e) {
+    domainMsg.textContent = "Chyba: " + e.message;
+    domainMsg.className = "msg err";
+    saveBtn.disabled = false;
+    saveBtn.textContent = "Uložit";
+  }
 });
 
 // --- Step 2: Check login ---
