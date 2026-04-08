@@ -318,8 +318,30 @@
     card.id = CONTAINER_ID;
     card.className = "ppf-search-card ppf-search-loading ppf-profile-card";
     card.innerHTML = '<span class="ppf-search-logo">eRec</span>';
+
     if (nameEl) {
-      nameEl.after(card);
+      // Don't insert near h2 — it's buried in nested flex containers.
+      // Instead, find the profile's top card section and insert after name area.
+      const section = nameEl.closest("section")
+        || nameEl.closest("[data-member-id]")
+        || nameEl.closest("main > div > div");
+
+      let inserted = false;
+      if (section) {
+        // Find first <p> with real text — that's the bio/headline
+        const paragraphs = section.querySelectorAll("p");
+        for (const p of paragraphs) {
+          const text = p.textContent.trim();
+          if (text.length > 10 && !p.closest("h1, h2, button, a[href='/']")) {
+            p.before(card);
+            inserted = true;
+            break;
+          }
+        }
+      }
+      if (!inserted) {
+        nameEl.after(card);
+      }
     }
 
     lookupCandidate(parsed, card, 0);

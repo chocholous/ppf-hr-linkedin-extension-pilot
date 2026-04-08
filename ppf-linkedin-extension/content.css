@@ -274,22 +274,41 @@
 .ppf-search-email svg { color: currentColor; flex-shrink: 0; }
 
 /* ========================================
-   PROFILE — wider card under name
+   PROFILE — card under name, own line
    ======================================== */
 
 .ppf-profile-card {
-  display: flex;
-  margin: 8px 0;
-  padding: 4px 10px;
-  border-radius: 6px;
+  display: flex !important;
+  align-items: center;
+  gap: 8px;
+  margin: 8px 0 4px 0;
+  padding: 6px 12px;
+  border-radius: 8px;
+  width: fit-content;
+}
+
+.ppf-profile-card .ppf-search-logo {
+  font-size: 11px;
+  letter-spacing: 0.5px;
 }
 
 .ppf-profile-card .ppf-search-rows {
   flex-direction: row;
   flex-wrap: wrap;
-  gap: 4px 8px;
+  gap: 4px 10px;
 }
 
 .ppf-profile-card .ppf-search-row {
-  gap: 6px;
+  gap: 8px;
+}
+
+.ppf-profile-card .ppf-search-phone {
+  font-size: 12px;
+}
+
+.ppf-profile-card .ppf-search-link svg,
+.ppf-profile-card .ppf-search-phone svg,
+.ppf-profile-card .ppf-search-email svg {
+  width: 14px;
+  height: 14px;
 }

@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "PPF eRec – LinkedIn Matcher",
-  "version": "0.4.1",
+  "version": "0.4.2",
   "description": "Zobrazí odkaz na kandidáta v PPF eRec přímo na LinkedIn profilu.",
   "update_url": "https://chocholous.github.io/ppf-hr-linkedin-extension-pilot/updates.xml",
   "permissions": [
