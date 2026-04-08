@@ -272,3 +272,24 @@
 }
 
 .ppf-search-email svg { color: currentColor; flex-shrink: 0; }
+
+/* ========================================
+   PROFILE — wider card under name
+   ======================================== */
+
+.ppf-profile-card {
+  display: flex;
+  margin: 8px 0;
+  padding: 4px 10px;
+  border-radius: 6px;
+}
+
+.ppf-profile-card .ppf-search-rows {
+  flex-direction: row;
+  flex-wrap: wrap;
+  gap: 4px 8px;
+}
+
+.ppf-profile-card .ppf-search-row {
+  gap: 6px;
+}
