@@ -9,9 +9,11 @@ const CACHE_TTL_MS = 5 * 60 * 1000; // 5 minutes
 
 // --- Config from chrome.storage.local ---
 
+const DEFAULT_DOMAIN = "ppfgrouprecruitment.com";
+
 async function getConfig() {
   const { erecDomain } = await chrome.storage.local.get("erecDomain");
-  if (!erecDomain) return null;
+  const domain = erecDomain || DEFAULT_DOMAIN;
   return {
     WEB_URL: `https://web.${erecDomain}`,
     API_BASE: `https://api.${erecDomain}/api/v1/grids/candidates`,

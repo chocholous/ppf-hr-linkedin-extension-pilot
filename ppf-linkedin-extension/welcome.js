@@ -179,26 +179,47 @@ checkBtn.addEventListener("click", async () => {
   checkBtn.textContent = "Ověřit přihlášení";
 });
 
-// --- Restore state if already configured ---
+// --- Initialize: restore state or use default ---
+
+var DEFAULT_DOMAIN = "ppfgrouprecruitment.com";
 
 chrome.storage.local.get("erecDomain", async ({ erecDomain }) => {
-  if (!erecDomain) return;
+  var domain = erecDomain || DEFAULT_DOMAIN;
+  savedDomain = domain;
+  domainInput.value = domain;
+  erecLink.href = "https://web." + domain;
 
-  savedDomain = erecDomain;
-  domainInput.value = erecDomain;
-  erecLink.href = "https://web." + erecDomain;
-  domainMsg.textContent = "✓ Uloženo — web." + erecDomain;
-  domainMsg.className = "msg ok";
-  markDone("domain");
-  enable("login");
+  if (erecDomain) {
+    domainMsg.textContent = "✓ Uloženo — web." + domain;
+    domainMsg.className = "msg ok";
+    markDone("domain");
+    enable("login");
+  } else {
+    domainMsg.textContent = "Výchozí doména — klikněte Uložit pro potvrzení";
+    domainMsg.className = "msg info";
+  }
 
+  // Auto-check login with default/saved domain
   try {
-    const cookie = await chrome.cookies.get({
-      url: "https://web." + erecDomain,
-      name: "erec_token",
-    });
-    if (cookie && cookie.value) {
-      loginMsg.textContent = "✓ Přihlášení detekováno — klikněte na Ověřit pro plný test";
+    var ok = await tryVerifyLogin(domain);
+    if (ok) {
+      // Already logged in — skip straight to success
+      if (!erecDomain) {
+        await chrome.storage.local.set({ erecDomain: domain });
+      }
+      domainMsg.textContent = "✓ Uloženo — web." + domain;
+      domainMsg.className = "msg ok";
+      markDone("domain");
+      loginMsg.textContent = "✓ Přihlášení ověřeno — spojení s eRec funguje";
+      loginMsg.className = "msg ok";
+      markDone("login");
+      enable("pin");
+      enable("done");
+      chrome.runtime.sendMessage({ action: "updateBadge" });
+      showSuccess();
+    } else if (erecDomain) {
+      enable("login");
+      loginMsg.textContent = "Přihlaste se do eRec a klikněte Ověřit";
       loginMsg.className = "msg info";
     }
   } catch (e) { /* ignore */ }
